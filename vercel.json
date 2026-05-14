@@ -2,8 +2,7 @@
   "version": 2,
   "experimentalServices": {
     "frontend": {
-      "entrypoint": "frontend",
-      "use": "@vercel/next"
+      "entrypoint": "frontend"
     }
   }
 }
