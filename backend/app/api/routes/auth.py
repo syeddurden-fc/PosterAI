@@ -1,12 +1,14 @@
 """Authentication routes"""
 from fastapi import APIRouter, HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
+import logging
 
 from app.schemas.user import UserCreate, UserLogin, TokenResponse
 from app.services.auth import AuthService
 from app.db.session import get_db
 from fastapi import Depends
 
+logger = logging.getLogger(__name__)
 router = APIRouter(prefix="/auth", tags=["auth"])
 
 
@@ -23,15 +25,17 @@ async def signup(
         return result
     except ValueError as e:
         await session.rollback()
+        logger.warning(f"Signup validation error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         )
     except Exception as e:
         await session.rollback()
+        logger.error(f"Signup error: {type(e).__name__}: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error",
+            detail=f"Internal server error: {str(e)}",
         )
 
 
@@ -48,13 +52,15 @@ async def login(
         return result
     except ValueError as e:
         await session.rollback()
+        logger.warning(f"Login validation error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=str(e),
         )
     except Exception as e:
         await session.rollback()
+        logger.error(f"Login error: {type(e).__name__}: {str(e)}", exc_info=True)
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error",
+            detail=f"Internal server error: {str(e)}",
         )

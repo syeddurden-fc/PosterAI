@@ -53,9 +53,15 @@ class Settings(BaseSettings):
         "OTEL_EXPORTER_OTLP_ENDPOINT"
     )
 
+    # External Poster APIs
+    UNSPLASH_API_KEY: Optional[str] = os.getenv("UNSPLASH_API_KEY", None)
+    PEXELS_API_KEY: Optional[str] = os.getenv("PEXELS_API_KEY", None)
+    PIXABAY_API_KEY: Optional[str] = os.getenv("PIXABAY_API_KEY", None)
+
     class Config:
         env_file = ".env"
         case_sensitive = True
+        extra = "ignore"  # Ignore extra fields from .env
 
 
 @lru_cache()
