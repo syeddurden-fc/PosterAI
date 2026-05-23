@@ -20,6 +20,12 @@ class UserRepository(BaseRepository[User]):
         return result.scalars().first()
 
     async def email_exists(self, email: str) -> bool:
+        """Check if email already exists"""
+        user = await self.get_by_email(email)
+        return user is not None
+
+
+    async def email_exists(self, email: str) -> bool:
         """Check if email exists"""
         user = await self.get_by_email(email)
         return user is not None

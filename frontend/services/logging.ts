@@ -1,173 +1,111 @@
 /**
- * Frontend logging service
- * Sends events to backend for structured logging
+ * Logging service for tracking user actions and AI operations
  */
 
-import { apiClient } from './api'
-
-export interface LogEventPayload {
-  event_type: string
-  user_id?: number
-  session_id?: number
-  layout_id?: number
-  duration_ms?: number
-  status?: 'success' | 'failed'
-  metadata?: Record<string, any>
-  message?: string
+interface LogEvent {
+  timestamp: string
+  event: string
+  data: Record<string, any>
 }
 
 class LoggingService {
-  /**
-   * Log an event to the backend
-   */
-  async logEvent(payload: LogEventPayload): Promise<void> {
-    try {
-      await apiClient.request('/ai/log-event', {
-        method: 'POST',
-        body: JSON.stringify(payload),
-      })
-    } catch (error) {
-      // Silently fail - don't break the app if logging fails
-      console.error('Failed to log event:', error)
-    }
-  }
+  private logs: LogEvent[] = []
 
-  /**
-   * Log AI generation started
-   */
   async logAIGenerationStarted(
     sessionId: number,
     posterIds: number[],
-    layoutPreset: string,
-    userId?: number
-  ): Promise<void> {
-    await this.logEvent({
-      event_type: 'ai_generation_started',
-      user_id: userId,
-      session_id: sessionId,
-      metadata: {
-        poster_ids: posterIds,
-        layout_preset: layoutPreset,
-        poster_count: posterIds.length,
+    preset: string
+  ) {
+    const event: LogEvent = {
+      timestamp: new Date().toISOString(),
+      event: 'ai_generation_started',
+      data: {
+        sessionId,
+        posterIds,
+        preset,
       },
-      message: `AI layout generation started for session ${sessionId}`,
-    })
+    }
+    this.logs.push(event)
+    console.log('[AI Generation Started]', event.data)
   }
 
-  /**
-   * Log AI generation completed
-   */
   async logAIGenerationCompleted(
     sessionId: number,
     layoutId: number,
-    durationMs: number,
+    duration: number,
     wallColor: string,
-    wallDimensions: { width: number; height: number },
-    layoutPreset: string,
-    userId?: number
-  ): Promise<void> {
-    await this.logEvent({
-      event_type: 'ai_generation_completed',
-      user_id: userId,
-      session_id: sessionId,
-      layout_id: layoutId,
-      duration_ms: durationMs,
-      status: 'success',
-      metadata: {
-        wall_color: wallColor,
-        wall_dimensions: wallDimensions,
-        layout_preset: layoutPreset,
+    dimensions: any,
+    preset: string
+  ) {
+    const event: LogEvent = {
+      timestamp: new Date().toISOString(),
+      event: 'ai_generation_completed',
+      data: {
+        sessionId,
+        layoutId,
+        duration,
+        wallColor,
+        dimensions,
+        preset,
       },
-      message: `AI layout ${layoutId} generated in ${durationMs}ms`,
-    })
+    }
+    this.logs.push(event)
+    console.log('[AI Generation Completed]', event.data)
   }
 
-  /**
-   * Log AI generation failed
-   */
   async logAIGenerationFailed(
     sessionId: number,
     errorType: string,
-    errorMessage: string,
-    durationMs?: number,
-    userId?: number
-  ): Promise<void> {
-    await this.logEvent({
-      event_type: 'ai_generation_failed',
-      user_id: userId,
-      session_id: sessionId,
-      duration_ms: durationMs,
-      status: 'failed',
-      metadata: {
-        error_type: errorType,
-        error_message: errorMessage,
+    message: string,
+    duration: number
+  ) {
+    const event: LogEvent = {
+      timestamp: new Date().toISOString(),
+      event: 'ai_generation_failed',
+      data: {
+        sessionId,
+        errorType,
+        message,
+        duration,
       },
-      message: `AI layout generation failed: ${errorMessage}`,
-    })
+    }
+    this.logs.push(event)
+    console.error('[AI Generation Failed]', event.data)
   }
 
-  /**
-   * Log preview rendering started
-   */
-  async logPreviewRenderingStarted(
-    sessionId: number,
-    layoutId: number,
-    userId?: number
-  ): Promise<void> {
-    await this.logEvent({
-      event_type: 'preview_rendering_started',
-      user_id: userId,
-      session_id: sessionId,
-      layout_id: layoutId,
-      message: `Preview rendering started for layout ${layoutId}`,
-    })
+  async logPosterAdded(posterId: number, quantity: number) {
+    const event: LogEvent = {
+      timestamp: new Date().toISOString(),
+      event: 'poster_added_to_cart',
+      data: {
+        posterId,
+        quantity,
+      },
+    }
+    this.logs.push(event)
+    console.log('[Poster Added]', event.data)
   }
 
-  /**
-   * Log preview rendering completed
-   */
-  async logPreviewRenderingCompleted(
-    sessionId: number,
-    layoutId: number,
-    durationMs: number,
-    previewPath: string,
-    userId?: number
-  ): Promise<void> {
-    await this.logEvent({
-      event_type: 'preview_rendering_completed',
-      user_id: userId,
-      session_id: sessionId,
-      layout_id: layoutId,
-      duration_ms: durationMs,
-      status: 'success',
-      metadata: {
-        preview_path: previewPath,
+  async logOrderCreated(orderId: number, totalAmount: number, itemCount: number) {
+    const event: LogEvent = {
+      timestamp: new Date().toISOString(),
+      event: 'order_created',
+      data: {
+        orderId,
+        totalAmount,
+        itemCount,
       },
-      message: `Preview rendered in ${durationMs}ms`,
-    })
+    }
+    this.logs.push(event)
+    console.log('[Order Created]', event.data)
   }
 
-  /**
-   * Log wall detection
-   */
-  async logWallDetection(
-    sessionId: number,
-    wallColor: string,
-    wallDimensions: { width: number; height: number },
-    durationMs: number,
-    userId?: number
-  ): Promise<void> {
-    await this.logEvent({
-      event_type: 'wall_detection_completed',
-      user_id: userId,
-      session_id: sessionId,
-      duration_ms: durationMs,
-      metadata: {
-        wall_color: wallColor,
-        wall_dimensions: wallDimensions,
-      },
-      message: `Wall detected: ${wallColor}`,
-    })
+  getLogs(): LogEvent[] {
+    return this.logs
+  }
+
+  clearLogs() {
+    this.logs = []
   }
 }
 

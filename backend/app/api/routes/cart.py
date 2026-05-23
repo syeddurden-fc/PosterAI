@@ -1,5 +1,5 @@
 """Cart routes"""
-from fastapi import APIRouter, HTTPException, status, Header
+from fastapi import APIRouter, HTTPException, status, Header, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.schemas.cart import CartResponse, CartItemBase
@@ -98,7 +98,7 @@ async def remove_from_cart(
 @router.put("/update/{poster_id}", response_model=CartResponse)
 async def update_quantity(
     poster_id: int,
-    quantity: int,
+    quantity: int = Query(..., ge=1),
     user_id: int = Depends(get_user_id),
     session: AsyncSession = Depends(get_db),
 ):

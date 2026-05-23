@@ -1,37 +1,28 @@
 /**
- * Hook to require authentication on a page
- * Redirects to login if user is not authenticated
+ * Hook to require authentication for protected pages
  */
-import { useEffect, useState } from 'react'
+
 import { useRouter } from 'next/navigation'
 import { useAuthStore } from '@/store/useAuthStore'
+import { useEffect, useState } from 'react'
 
 export function useRequireAuth() {
   const router = useRouter()
-  const { user, isHydrated, hydrate } = useAuthStore()
+  const { user, isLoading } = useAuthStore()
   const [isAuthorized, setIsAuthorized] = useState(false)
 
-  // Hydrate auth on mount
   useEffect(() => {
-    hydrate()
-  }, [hydrate])
-
-  // Check authorization after hydration
-  useEffect(() => {
-    if (isHydrated) {
+    if (!isLoading) {
       if (!user) {
         // Not authenticated, redirect to login
         router.push('/login')
+        setIsAuthorized(false)
       } else {
-        // Authenticated, allow access
+        // Authenticated
         setIsAuthorized(true)
       }
     }
-  }, [isHydrated, user, router])
+  }, [user, isLoading, router])
 
-  return {
-    isAuthorized,
-    user,
-    isLoading: !isHydrated,
-  }
+  return { isAuthorized, isLoading }
 }
