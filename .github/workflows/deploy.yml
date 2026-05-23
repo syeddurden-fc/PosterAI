@@ -19,4 +19,4 @@ jobs:
             echo "Error: VERCEL_TOKEN is not set in GitHub secrets"
             exit 1
           fi
-          vercel --prod --token "$VERCEL_TOKEN"
+          vercel --prod --token "$VERCEL_TOKEN" --yes
