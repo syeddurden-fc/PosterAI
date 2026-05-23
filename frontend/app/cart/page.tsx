@@ -75,7 +75,7 @@ export default function CartPage() {
       const payment = await apiClient.initiatePayment(order.id, selectedPayment)
       
       // Simulate payment completion
-      await apiClient.completePayment(payment.id, `TXN-${Date.now()}`)
+      await apiClient.completePayment(payment.payment_id, `TXN-${Date.now()}`)
       
       router.push("/success")
     } catch (error) {
@@ -133,7 +133,7 @@ export default function CartPage() {
               <div className="lg:col-span-2 space-y-4">
                 {items.map((item, index) => (
                   <motion.div
-                    key={item.id}
+                    key={item.poster_id}
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: index * 0.1 }}
@@ -144,7 +144,7 @@ export default function CartPage() {
                       <div
                         className="w-24 h-32 sm:w-32 sm:h-40 rounded-lg flex-shrink-0 bg-gradient-to-br from-secondary to-secondary/50"
                         style={{
-                          backgroundImage: `url(${item.poster.imageUrl})`,
+                          backgroundImage: `url(${item.poster.image_url})`,
                           backgroundSize: "cover",
                           backgroundPosition: "center",
                         }}
@@ -155,7 +155,7 @@ export default function CartPage() {
                         <div className="flex justify-between items-start">
                           <div>
                             <h3 className="font-semibold text-foreground">{item.poster.title}</h3>
-                            <p className="text-sm text-muted-foreground">{item.poster.category}</p>
+                            <p className="text-sm text-muted-foreground">{item.poster.category?.name || 'Uncategorized'}</p>
                             <p className="text-sm text-muted-foreground mt-1">Qty: {item.quantity}</p>
                           </div>
                           <button

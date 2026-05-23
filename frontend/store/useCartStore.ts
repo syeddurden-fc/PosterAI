@@ -2,20 +2,11 @@
  * Shopping cart store using Zustand with persistence
  */
 import { create } from 'zustand'
-import { apiClient } from '@/services/api'
+import { apiClient, CartItem as APICartItem, Poster } from '@/services/api'
 
-interface Poster {
-  id: number
-  title: string
-  price: number
-  imageUrl: string
-  category: string
-}
-
-interface CartItem {
-  id: number
+// Extend API CartItem to ensure poster is always present
+interface CartItem extends APICartItem {
   poster: Poster
-  quantity: number
 }
 
 interface CartStore {
@@ -58,7 +49,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
       const response = await apiClient.getCart()
       console.log("Cart response:", response)
       // Handle both direct items array and nested structure
-      const items = response.items || response.cart_items || []
+      const items = (response.items || []) as CartItem[]
       set({ items, isLoading: false })
     } catch (error) {
       console.error("Cart fetch error:", error)
@@ -74,7 +65,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
     try {
       const response = await apiClient.addToCart(posterId, quantity)
       console.log("Add to cart response:", response)
-      const items = response.items || response.cart_items || []
+      const items = (response.items || []) as CartItem[]
       set({ items, isLoading: false })
     } catch (error) {
       console.error("Add to cart error:", error)
@@ -91,7 +82,7 @@ export const useCartStore = create<CartStore>((set, get) => ({
     try {
       const response = await apiClient.removeFromCart(posterId)
       console.log("Remove from cart response:", response)
-      const items = response.items || response.cart_items || []
+      const items = (response.items || []) as CartItem[]
       set({ items, isLoading: false })
     } catch (error) {
       console.error("Remove from cart error:", error)
@@ -109,13 +100,13 @@ export const useCartStore = create<CartStore>((set, get) => ({
       if (quantity <= 0) {
         // If quantity is 0 or less, remove the item
         const response = await apiClient.removeFromCart(posterId)
-        const items = response.items || response.cart_items || []
+        const items = (response.items || []) as CartItem[]
         set({ items, isLoading: false })
       } else {
         // Update to the new quantity
         const response = await apiClient.updateCartQuantity(posterId, quantity)
         console.log("Update quantity response:", response)
-        const items = response.items || response.cart_items || []
+        const items = (response.items || []) as CartItem[]
         set({ items, isLoading: false })
       }
     } catch (error) {

@@ -18,31 +18,15 @@ const navLinks = [
 
 export function Navigation() {
   const [isOpen, setIsOpen] = useState(false)
-  const [cartCount, setCartCount] = useState(0)
   const { user, logout } = useAuthStore()
-  const { getTotalCount, hydrate } = useCartStore()
+  const { getTotalCount, hydrate, items } = useCartStore()
   const router = useRouter()
+  const cartCount = getTotalCount()
 
   // Hydrate cart on mount
   useEffect(() => {
     hydrate()
   }, [hydrate])
-
-  // Subscribe to cart changes
-  useEffect(() => {
-    const unsubscribe = useCartStore.subscribe(
-      (state) => state.items,
-      () => {
-        // Update cart count whenever items change
-        setCartCount(getTotalCount())
-      }
-    )
-
-    // Initial count
-    setCartCount(getTotalCount())
-
-    return () => unsubscribe()
-  }, [getTotalCount])
 
   const handleLogout = () => {
     logout()
