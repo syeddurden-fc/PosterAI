@@ -1,0 +1,10 @@
+# Ignore everything except frontend
+../.git
+../backend
+../.github
+../.kiro
+../node_modules
+../*.md
+../.env
+../.env.local
+../.env.*.local
