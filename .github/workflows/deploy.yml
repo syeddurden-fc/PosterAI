@@ -20,4 +20,5 @@ jobs:
             exit 1
           fi
           cd frontend
-          vercel --prod --token "$VERCEL_TOKEN" --yes
+          vercel --prod --token "$VERCEL_TOKEN" --yes --confirm
+
