@@ -8,7 +8,7 @@ from app.db.base import Base, TimestampMixin
 class User(Base, TimestampMixin):
     """User model for authentication and profile"""
 
-    __tablename__ = "users"
+    __tablename__ = "app_users"
 
     id: Mapped[int] = mapped_column(primary_key=True)
     name: Mapped[str] = mapped_column(String(255))
